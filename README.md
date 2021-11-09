@@ -2,11 +2,11 @@
 
 ## params
 - path
-- dependecies
+- dependencies
 
 
 ## exampl
 
 ```shell
-node scann.js path=pathToProject_1,pathToProject_2  dependecies=coa,rc
+node scann.js path=pathToProject_1,pathToProject_2  dependencies=coa,rc
 ```
