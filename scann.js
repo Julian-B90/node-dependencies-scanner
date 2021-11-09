@@ -21,7 +21,7 @@ const recursiveSearch = (obj, searchKey, results = []) => {
   const r = results;
   Object.keys(obj).forEach((key) => {
     const value = obj[key];
-    if (value === searchKey) {
+    if (value.endsWith(searchKey)) {
       r.push(value);
     }
     if (typeof value === 'object') {
@@ -37,15 +37,8 @@ args.path.forEach((itemPath) => {
 
   exec(`npm list --parseable`, (erro, stdout, stderr) => {
     const npmList = stdout.split('\n');
-    const libs = [];
-    for (let listItem of npmList) {
-      if (listItem && listItem.length > 0) {
-        libs.push(listItem.replace(/^.*node_modules\/(.*)/, '$1'));
-      }
-    }
-
     args.dependencies.forEach((dep) => {
-      const found = recursiveSearch(libs, dep, []);
+      const found = recursiveSearch(npmList, dep, []);
       if (found.length > 0) {
         console.error(FgRed, 'found dependency', found);
       } else {
