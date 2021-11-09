@@ -1,30 +1,38 @@
-'use strict';
+"use strict";
 
-const { exec } = require('child_process');
+const { exec } = require("child_process");
+const path = require("path");
 
-const FgGreen = '\x1b[32m';
-const FgRed = '\x1b[31m';
+const FgGreen = "\x1b[32m";
+const FgRed = "\x1b[31m";
 
 let args = {
   path: [],
   dependencies: [],
 };
 process.argv.slice(2).forEach((item) => {
-  const newArg = item.split('=');
+  const newArg = item.split("=");
   args = {
     ...args,
-    [newArg[0]]: newArg[1].split(','),
+    [newArg[0]]: newArg[1].split(","),
   };
+  if (args.p) {
+    args.path = args.p;
+  }
+  if (args.d) {
+    args.dependencies = args.d;
+  }
 });
 
 const recursiveSearch = (obj, searchKey, results = []) => {
   const r = results;
   Object.keys(obj).forEach((key) => {
     const value = obj[key];
-    if (value === searchKey) {
-      r.push(value);
+    if (value.endsWith(searchKey)) {
+      const pjson = require(`${value}${path.sep}package.json`);
+      r.push(`${searchKey}: ${pjson.version}`);
     }
-    if (typeof value === 'object') {
+    if (typeof value === "object") {
       recursiveSearch(value, searchKey, r);
     }
   });
@@ -36,18 +44,11 @@ args.path.forEach((itemPath) => {
   console.info(`run in ${itemPath}`);
 
   exec(`npm list --parseable`, (erro, stdout, stderr) => {
-    const npmList = stdout.split('\n');
-    const libs = [];
-    for (let listItem of npmList) {
-      if (listItem && listItem.length > 0) {
-        libs.push(listItem.replace(/^.*node_modules\/(.*)/, '$1'));
-      }
-    }
-
+    const npmList = stdout.split("\n");
     args.dependencies.forEach((dep) => {
-      const found = recursiveSearch(libs, dep, []);
+      const found = recursiveSearch(npmList, dep, []);
       if (found.length > 0) {
-        console.error(FgRed, 'found dependency', found);
+        console.error(FgRed, "found dependency", found);
       } else {
         console.log(FgGreen, `${dep}: not found`);
       }
