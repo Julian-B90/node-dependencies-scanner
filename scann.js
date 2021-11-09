@@ -1,6 +1,6 @@
 "use strict";
 
-const { exec, execSync } = require("child_process");
+const { exec } = require("child_process");
 
 const FgGreen = "\x1b[32m";
 const FgRed = "\x1b[31m";
@@ -38,8 +38,10 @@ args.path.forEach((itemPath) => {
   exec(`npm list --parseable`, (erro, stdout, stderr) => {
     const npmList = stdout.split("\n");
     const libs = [];
-    for (let index = 0; index < npmList.length; index++) {
-      libs.push(npmList[index].replace(`${itemPath}/node_modules/`, ""));
+    for (let listItem of npmList) {
+      if (listItem && listItem.length > 0) {
+        libs.push(listItem.replace(`${itemPath}/node_modules/`, ""));
+      }
     }
 
     args.dependecies.forEach((dep) => {
